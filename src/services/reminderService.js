@@ -1,8 +1,9 @@
 import cron from 'node-cron';
-import ActionItem from '../models/ActionItem';
-import { sendOverdueReminder, sendOverdueSummary } from './slackService';
-import logger from '../utils/logger';
-import { uuidv4 } from 'uuid';
+import { ActionItem } from '../models/ActionItem.js';
+import { sendOverdueReminder, sendOverdueSummary } from './slackService.js';
+import { logger } from '../utils/logger.js';
+import { v4 as uuidv4 } from 'uuid';
+
 
 let schedulerTask = null;
 

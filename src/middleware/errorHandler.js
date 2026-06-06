@@ -1,4 +1,4 @@
-const logger = require('../utils/logger');
+import { logger } from '../utils/logger.js';
 
 const errorHandler = (err, req, res, next) => {
   const traceId = res.locals.traceId;
@@ -88,4 +88,4 @@ const notFound = (req, res) => {
   });
 };
 
-module.exports = { errorHandler, notFound };
+export { errorHandler, notFound };

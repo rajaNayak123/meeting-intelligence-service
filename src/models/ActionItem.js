@@ -83,7 +83,4 @@ actionItemSchema.set('toObject', { virtuals: true });
 
 const ActionItem = mongoose.model('ActionItem', actionItemSchema);
 
-module.exports = {
-  ActionItem,
-  STATUS
-};
+export { ActionItem, STATUS };

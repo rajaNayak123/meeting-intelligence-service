@@ -94,6 +94,5 @@ meetingSchema.index({ title: 'text' });
 
 const Meeting = mongoose.model('Meeting', meetingSchema);
 
-export{
-  Meeting
-};
+export { Meeting };
+export default Meeting;

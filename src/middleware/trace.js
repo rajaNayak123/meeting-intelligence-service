@@ -1,5 +1,5 @@
-const { v4: uuidv4 } = require('uuid');
-const logger = require('../utils/logger');
+import { v4 as uuidv4 } from 'uuid';
+import { logger } from '../utils/logger.js';
 
 const traceMiddleware = (req, res, next) => {
   const traceId = req.headers['x-trace-id'] || uuidv4();
@@ -30,4 +30,4 @@ const traceMiddleware = (req, res, next) => {
   next();
 };
 
-module.exports = traceMiddleware;
+export default traceMiddleware;

@@ -1,8 +1,9 @@
-import Meeting from '../models/Meeting';
-import ActionItem from '../models/ActionItem';
-import { analyzeMeeting } from '../services/groqService';
-import { successResponse, errorResponse, paginatedResponse } from '../utils/response';
-import logger from '../utils/logger';
+import { Meeting } from '../models/Meeting.js';
+import { ActionItem } from '../models/ActionItem.js';
+import { analyzeMeeting } from '../services/groqService.js';
+import { successResponse, errorResponse, paginatedResponse } from '../utils/response.js';
+import { logger } from '../utils/logger.js';
+
 
 /**
  * @swagger

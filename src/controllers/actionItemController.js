@@ -1,9 +1,8 @@
-import ActionItemModel from '../models/ActionItem';
-const ActionItem = ActionItemModel;
-const { STATUS } = ActionItemModel;
-import Meeting from '../models/Meeting';
-import { successResponse, errorResponse, paginatedResponse } from '../utils/response';
-import logger from '../utils/logger';
+import { ActionItem, STATUS } from '../models/ActionItem.js';
+import { Meeting } from '../models/Meeting.js';
+import { successResponse, errorResponse, paginatedResponse } from '../utils/response.js';
+import { logger } from '../utils/logger.js';
+
 
 const createActionItem = async (req, res, next) => {
   try {
