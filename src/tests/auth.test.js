@@ -1,32 +1,42 @@
+import { jest } from '@jest/globals';
 import jwt from 'jsonwebtoken';
 
 // Mock mongoose models
-jest.mock('../models/User.js', () => {
-  const mockUser = {
-    _id: 'user123',
-    name: 'Test User',
-    email: 'test@example.com',
-    comparePassword: jest.fn(),
-    toJSON: jest.fn().mockReturnValue({ _id: 'user123', name: 'Test User', email: 'test@example.com' })
-  };
+jest.unstable_mockModule('../models/User.js', () => {
+  if (!globalThis.MockUser) {
+    const mockUser = {
+      _id: 'user123',
+      name: 'Test User',
+      email: 'test@example.com',
+      comparePassword: jest.fn(),
+      toJSON: jest.fn().mockReturnValue({ _id: 'user123', name: 'Test User', email: 'test@example.com' })
+    };
 
-  const MockUser = jest.fn().mockImplementation(() => mockUser);
-  MockUser.findOne = jest.fn();
-  MockUser.create = jest.fn();
-  MockUser.findById = jest.fn();
-  return { User: MockUser, default: MockUser };
+    const MockUser = jest.fn().mockImplementation(() => mockUser);
+    MockUser.findOne = jest.fn();
+    MockUser.create = jest.fn();
+    MockUser.findById = jest.fn();
+    globalThis.MockUser = MockUser;
+  }
+  return { User: globalThis.MockUser, default: globalThis.MockUser };
 });
 
-jest.mock('../config/database.js', () => jest.fn().mockResolvedValue(true));
-jest.mock('../services/reminderService.js', () => ({
+jest.unstable_mockModule('../config/database.js', () => ({
+  default: jest.fn().mockResolvedValue(true),
+  connectDB: jest.fn().mockResolvedValue(true)
+}));
+jest.unstable_mockModule('../services/reminderService.js', () => ({
   startScheduler: jest.fn(),
   stopScheduler: jest.fn(),
   runReminderJob: jest.fn()
 }));
 
-import request from 'supertest';
-import app from '../app.js';
-import { User } from '../models/User.js';
+const request = (await import('supertest')).default;
+const { default: app } = await import('../app.js');
+const userModule = await import('../models/User.js');
+const User = userModule.User;
+globalThis.UserInTest = User;
+console.log('TEST User identity check: User === default:', User === userModule.default);
 
 process.env.JWT_SECRET = 'test_secret';
 process.env.NODE_ENV = 'test';
@@ -73,6 +83,7 @@ describe('Auth Controller Unit Tests', () => {
         .post('/api/auth/register')
         .send({ name: 'Test User', email: 'test@example.com', password: 'password123' });
 
+      if (res.status !== 201) console.log('REGISTER ERROR BODY:', JSON.stringify(res.body, null, 2));
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
       expect(res.body.data.token).toBeDefined();
@@ -103,6 +114,7 @@ describe('Auth Controller Unit Tests', () => {
       User.findOne.mockReturnValue({
         select: jest.fn().mockResolvedValue(null)
       });
+      console.log('TEST mock value set on User.findOne:', User.findOne());
 
       const res = await request(app)
         .post('/api/auth/login')

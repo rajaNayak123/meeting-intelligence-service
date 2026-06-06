@@ -10,6 +10,7 @@ const logger = createLogger({
   defaultMeta: { service: 'meeting-intelligence' },
   transports: [
     new transports.Console({
+      silent: process.env.NODE_ENV === 'test',
       format: format.combine(
         format.colorize(),
         format.printf(({ timestamp, level, message, traceId, method, path, status, ...rest }) => {

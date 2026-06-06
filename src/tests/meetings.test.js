@@ -1,50 +1,79 @@
+import { jest } from '@jest/globals';
 import jwt from 'jsonwebtoken';
 
-jest.mock('../models/Meeting.js', () => {
-  const Meeting = {
-    find: jest.fn(),
-    findOne: jest.fn(),
-    findOneAndDelete: jest.fn(),
-    create: jest.fn(),
-    countDocuments: jest.fn()
-  };
-  return { Meeting, default: Meeting };
+// Mock mongoose models
+jest.unstable_mockModule('../models/Meeting.js', () => {
+  if (!globalThis.MockMeeting) {
+    globalThis.MockMeeting = {
+      find: jest.fn(),
+      findOne: jest.fn(),
+      findOneAndDelete: jest.fn(),
+      create: jest.fn(),
+      countDocuments: jest.fn()
+    };
+  }
+  return { Meeting: globalThis.MockMeeting, default: globalThis.MockMeeting };
 });
-jest.mock('../models/ActionItem.js', () => {
-  const ActionItem = {
-    find: jest.fn(),
-    findOne: jest.fn(),
-    findOneAndDelete: jest.fn(),
-    findByIdAndUpdate: jest.fn(),
-    insertMany: jest.fn(),
-    countDocuments: jest.fn()
-  };
-  return { ActionItem, default: ActionItem };
+jest.unstable_mockModule('../models/ActionItem.js', () => {
+  if (!globalThis.MockActionItem) {
+    const STATUS = { PENDING: 'PENDING', IN_PROGRESS: 'IN_PROGRESS', COMPLETED: 'COMPLETED' };
+    globalThis.MockActionItem = {
+      STATUS,
+      find: jest.fn(),
+      findOne: jest.fn(),
+      findOneAndDelete: jest.fn(),
+      findByIdAndUpdate: jest.fn(),
+      insertMany: jest.fn(),
+      countDocuments: jest.fn()
+    };
+  }
+  return { ActionItem: globalThis.MockActionItem, STATUS: globalThis.MockActionItem.STATUS, default: globalThis.MockActionItem };
 });
-jest.mock('../models/User.js', () => {
-  const User = { findById: jest.fn() };
-  return { User, default: User };
+jest.unstable_mockModule('../models/User.js', () => {
+  if (!globalThis.MockUser) {
+    globalThis.MockUser = { findById: jest.fn() };
+  }
+  return { User: globalThis.MockUser, default: globalThis.MockUser };
 });
-jest.mock('../services/groqService.js', () => ({
-  analyzeMeeting: jest.fn().mockResolvedValue({
-    summary: [{ text: 'Team plans to launch next Friday.', citations: [{ timestamp: '00:10', speaker: 'John', text: 'We should launch next Friday.' }] }],
-    actionItems: [{ task: 'Prepare release notes', assignee: 'Alice', dueDate: null, citations: [{ timestamp: '00:20', speaker: 'Alice', text: 'I will prepare release notes.' }] }],
-    decisions: [],
-    followUpSuggestions: [],
-    analyzedAt: new Date()
-  })
-}));
-jest.mock('../config/database.js', () => jest.fn().mockResolvedValue(true));
-jest.mock('../services/reminderService.js', () => ({
-  startScheduler: jest.fn(),
-  stopScheduler: jest.fn()
-}));
+jest.unstable_mockModule('../services/groqService.js', () => {
+  if (!globalThis.MockGroqService) {
+    globalThis.MockGroqService = {
+      analyzeMeeting: jest.fn().mockResolvedValue({
+        summary: [{ text: 'Team plans to launch next Friday.', citations: [{ timestamp: '00:10', speaker: 'John', text: 'We should launch next Friday.' }] }],
+        actionItems: [{ task: 'Prepare release notes', assignee: 'Alice', dueDate: null, citations: [{ timestamp: '00:20', speaker: 'Alice', text: 'I will prepare release notes.' }] }],
+        decisions: [],
+        followUpSuggestions: [],
+        analyzedAt: new Date()
+      })
+    };
+  }
+  return globalThis.MockGroqService;
+});
+jest.unstable_mockModule('../config/database.js', () => {
+  if (!globalThis.MockDatabase) {
+    globalThis.MockDatabase = {
+      default: jest.fn().mockResolvedValue(true),
+      connectDB: jest.fn().mockResolvedValue(true)
+    };
+  }
+  return globalThis.MockDatabase;
+});
+jest.unstable_mockModule('../services/reminderService.js', () => {
+  if (!globalThis.MockReminderService) {
+    globalThis.MockReminderService = {
+      startScheduler: jest.fn(),
+      stopScheduler: jest.fn(),
+      runReminderJob: jest.fn()
+    };
+  }
+  return globalThis.MockReminderService;
+});
 
-import request from 'supertest';
-import app from '../app.js';
-import { Meeting } from '../models/Meeting.js';
-import { ActionItem } from '../models/ActionItem.js';
-import { User } from '../models/User.js';
+const request = (await import('supertest')).default;
+const { default: app } = await import('../app.js');
+const { Meeting } = await import('../models/Meeting.js');
+const { ActionItem } = await import('../models/ActionItem.js');
+const { User } = await import('../models/User.js');
 
 process.env.JWT_SECRET = 'test_secret';
 process.env.NODE_ENV = 'test';

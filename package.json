@@ -10,7 +10,7 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --forceExit",
-    "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=tests/integration --setupFilesAfterEnv='[\"./src/tests/integration/setup.js\"]' --runInBand --forceExit",
+    "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=tests/integration --setupFilesAfterEnv ./src/tests/setup.js --runInBand --forceExit",
     "test:all": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --forceExit",
     "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --runInBand --forceExit"
   },
@@ -41,12 +41,9 @@
   "jest": {
     "testEnvironment": "node",
     "testTimeout": 30000,
-    "extensionsToTreatAsEsm": [
-      ".js"
-    ],
     "transform": {},
     "setupFilesAfterEnv": [
-      "./src/tests/dbSetup.js"
+      "./src/tests/setup.js"
     ],
     "testMatch": [
       "**/tests/**/*.test.js"

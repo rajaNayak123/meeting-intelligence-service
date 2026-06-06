@@ -100,7 +100,7 @@ const analyzeMeeting = async (meeting, traceId = 'system') => {
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       const completion = await client.chat.completions.create({
-        model: 'llama3-8b-8192',
+        model: 'llama-3.1-8b-instant',
         messages: [
           { role: 'system', content: buildSystemPrompt() },
           { role: 'user', content: buildUserPrompt(meeting) }

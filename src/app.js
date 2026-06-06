@@ -47,15 +47,15 @@ app.get('/api/evaluation', (req, res) => {
     traceId: res.locals.traceId,
     success: true,
     data: {
-      candidateName: 'Your Name',
-      email: 'your.email@example.com',
+      candidateName: 'Raja Nayak',
+      email: 'nayakraja@gmail.com',
       repositoryUrl: 'https://github.com/yourusername/meeting-intelligence',
       deployedUrl: process.env.BASE_URL || 'http://localhost:3000',
       externalIntegration: 'Slack Incoming Webhook',
       features: [
         'JWT Authentication',
         'Meeting Management (CRUD + Pagination + Filtering)',
-        'AI Analysis using Groq (llama3-8b-8192)',
+        'AI Analysis using Groq (llama-3.1-8b-instant)',
         'Grounded Citations — every insight cites transcript segment(s)',
         'Hallucination Prevention — prompt grounding + post-processing validation',
         'Action Item Management (CRUD + Status Tracking)',
