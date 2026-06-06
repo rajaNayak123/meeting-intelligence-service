@@ -1,5 +1,5 @@
 import Groq from 'groq-sdk';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
 let groqClient = null;
 

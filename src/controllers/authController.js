@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
-import User  from '../models/User';
-import { successResponse, errorResponse } from '../utils/response';
-import logger from '../utils/logger';
+import User  from '../models/User.js';
+import { successResponse, errorResponse } from '../utils/response.js';
+import { logger } from '../utils/logger.js';
 
 const generateToken = (userId) => {
   return jwt.sign(

@@ -7,9 +7,9 @@ import {
   getActionItem,
   getOverdueActionItems,
   deleteActionItem
-} from '../controllers/actionItemController';
-import authenticate from '../middleware/auth';
-import validate from '../middleware/validate';
+} from '../controllers/actionItemController.js';
+import authenticate from '../middleware/auth.js';
+import validate from '../middleware/validate.js';
 const router = express.Router();
 /**
  * @swagger

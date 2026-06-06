@@ -1,7 +1,7 @@
 import express from 'express';
-import { runReminderJob } from '../services/reminderService';
-import { successResponse } from '../utils/response';
-import logger from '../utils/logger';
+import { runReminderJob } from '../services/reminderService.js';
+import { successResponse } from '../utils/response.js';
+import { logger } from '../utils/logger.js';
 const router = express.Router();
 /**
  * @swagger

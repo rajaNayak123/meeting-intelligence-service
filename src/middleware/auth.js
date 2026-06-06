@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/User';
-import { errorResponse } from '../utils/response';
-import logger from '../utils/logger';
+import User from '../models/User.js';
+import { errorResponse } from '../utils/response.js';
+import { logger } from '../utils/logger.js';
 
 const authenticate = async (req, res, next) => {
   try {
@@ -38,3 +38,4 @@ const authenticate = async (req, res, next) => {
 };
 
 export { authenticate };
+export default authenticate;
