@@ -3,7 +3,10 @@ import { ActionItem } from '../models/ActionItem.js';
 import { analyzeMeeting } from '../services/groqService.js';
 import { successResponse, errorResponse, paginatedResponse } from '../utils/response.js';
 import { logger } from '../utils/logger.js';
+import { cacheGet, cacheSet, cacheDel, cacheDelPattern } from '../config/redis.js';
 
+/** Stable hash for query params used as part of the cache key */
+const hashQuery = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64url');
 
 /**
  * @swagger
@@ -49,6 +52,9 @@ const createMeeting = async (req, res, next) => {
       createdBy: req.user._id
     });
 
+    // Invalidate the list cache for this user
+    await cacheDelPattern(`meetings:${req.user._id}:*`);
+
     logger.info('Meeting created', { traceId, meetingId: meeting._id, userId: req.user._id });
 
     return successResponse(res, { meeting }, 201);
@@ -77,6 +83,13 @@ const createMeeting = async (req, res, next) => {
  */
 const getMeeting = async (req, res, next) => {
   try {
+    const cacheKey = `meeting:${req.params.id}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) {
+      logger.debug('Cache HIT meeting', { id: req.params.id });
+      return successResponse(res, { meeting: cached });
+    }
+
     const meeting = await Meeting.findOne({
       _id: req.params.id,
       createdBy: req.user._id
@@ -86,6 +99,7 @@ const getMeeting = async (req, res, next) => {
       return errorResponse(res, 'NOT_FOUND', 'Meeting not found', 404);
     }
 
+    await cacheSet(cacheKey, meeting, 300); // 5 min
     return successResponse(res, { meeting });
   } catch (error) {
     next(error);
@@ -142,15 +156,18 @@ const listMeetings = async (req, res, next) => {
     const skip = (pageNum - 1) * limitNum;
 
     const filter = { createdBy: req.user._id };
-
-    if (search) {
-      filter.title = { $regex: search, $options: 'i' };
-    }
-
+    if (search) filter.title = { $regex: search, $options: 'i' };
     if (from || to) {
       filter.meetingDate = {};
       if (from) filter.meetingDate.$gte = new Date(from);
-      if (to) filter.meetingDate.$lte = new Date(to);
+      if (to)   filter.meetingDate.$lte = new Date(to);
+    }
+
+    const cacheKey = `meetings:${req.user._id}:${hashQuery({ page: pageNum, limit: limitNum, search, from, to })}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) {
+      logger.debug('Cache HIT meetings list', { userId: req.user._id });
+      return res.status(200).json(cached);
     }
 
     const [meetings, total] = await Promise.all([
@@ -163,7 +180,19 @@ const listMeetings = async (req, res, next) => {
       Meeting.countDocuments(filter)
     ]);
 
-    return paginatedResponse(res, meetings, total, pageNum, limitNum);
+    const payload = {
+      traceId: res.locals.traceId,
+      success: true,
+      data: meetings,
+      pagination: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum)
+      }
+    };
+    await cacheSet(cacheKey, payload, 120); // 2 min
+    return res.status(200).json(payload);
   } catch (error) {
     next(error);
   }
@@ -212,13 +241,13 @@ const analyzeMeetingEndpoint = async (req, res, next) => {
     meeting.analysis = analysis;
     await meeting.save();
 
-    // Auto-create action items in the ActionItems collection from AI results
+    // Auto-create action items from AI results
     if (analysis.actionItems && analysis.actionItems.length > 0) {
       const actionItemDocs = analysis.actionItems.map(item => ({
         meetingId: meeting._id,
         task: item.task,
         assignee: item.assignee,
-        dueDate: item.dueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // default 7 days
+        dueDate: item.dueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         status: 'PENDING',
         citations: item.citations || [],
         createdBy: req.user._id
@@ -228,6 +257,10 @@ const analyzeMeetingEndpoint = async (req, res, next) => {
         logger.warn('Some action items failed to auto-create', { traceId, error: err.message });
       });
     }
+
+    // Invalidate meeting cache (data changed)
+    await cacheDel(`meeting:${req.params.id}`);
+    await cacheDelPattern(`meetings:${req.user._id}:*`);
 
     logger.info('Meeting analysis completed and saved', {
       traceId,
@@ -270,6 +303,11 @@ const deleteMeeting = async (req, res, next) => {
 
     // Also delete associated action items
     await ActionItem.deleteMany({ meetingId: req.params.id });
+
+    // Invalidate caches
+    await cacheDel(`meeting:${req.params.id}`);
+    await cacheDelPattern(`meetings:${req.user._id}:*`);
+    await cacheDelPattern(`actionItems:${req.user._id}:*`);
 
     logger.info('Meeting deleted', { traceId: res.locals.traceId, meetingId: req.params.id });
 

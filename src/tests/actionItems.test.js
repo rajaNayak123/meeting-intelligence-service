@@ -1,24 +1,46 @@
 import jwt from 'jsonwebtoken';
 
-jest.mock('../models/ActionItem');
-jest.mock('../models/Meeting');
-jest.mock('../models/User');
-jest.mock('../config/database', () => jest.fn().mockResolvedValue(true));
-jest.mock('../services/reminderService', () => ({
+jest.mock('../models/ActionItem.js', () => {
+  const STATUS = { PENDING: 'PENDING', IN_PROGRESS: 'IN_PROGRESS', COMPLETED: 'COMPLETED' };
+  const ActionItem = {
+    STATUS,
+    find: jest.fn(),
+    findOne: jest.fn(),
+    findOneAndDelete: jest.fn(),
+    findOneAndUpdate: jest.fn(),
+    create: jest.fn(),
+    countDocuments: jest.fn()
+  };
+  return { ActionItem, STATUS, default: ActionItem };
+});
+jest.mock('../models/Meeting.js', () => {
+  const Meeting = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    countDocuments: jest.fn()
+  };
+  return { Meeting, default: Meeting };
+});
+jest.mock('../models/User.js', () => {
+  const User = { findById: jest.fn() };
+  return { User, default: User };
+});
+jest.mock('../config/database.js', () => jest.fn().mockResolvedValue(true));
+jest.mock('../services/reminderService.js', () => ({
   startScheduler: jest.fn(),
   stopScheduler: jest.fn()
 }));
 
 import request from 'supertest';
 import app from '../app.js';
-import ActionItem from '../models/ActionItem.js';
-import Meeting from '../models/Meeting.js';
-import User from '../models/User.js';
+import { ActionItem } from '../models/ActionItem.js';
+import { Meeting } from '../models/Meeting.js';
+import { User } from '../models/User.js';
 
 process.env.JWT_SECRET = 'test_secret';
 process.env.NODE_ENV = 'test';
 
-ActionItem.STATUS = { PENDING: 'PENDING', IN_PROGRESS: 'IN_PROGRESS', COMPLETED: 'COMPLETED' };
 
 const AUTH_TOKEN = jwt.sign({ userId: 'user123' }, 'test_secret');
 const MOCK_USER = { _id: 'user123', name: 'Test User', email: 'test@example.com' };

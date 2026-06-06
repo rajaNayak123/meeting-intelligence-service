@@ -2,6 +2,7 @@ import 'dotenv/config';
 
 import app from './app.js';
 import { connectDB } from './config/database.js';
+import { connectRedis, disconnectRedis } from './config/redis.js';
 import { startScheduler, stopScheduler } from './services/reminderService.js';
 import logger from './utils/logger.js';
 import mongoose from 'mongoose';
@@ -10,8 +11,9 @@ const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
   try {
-    // Connect to MongoDB
     await connectDB();
+
+    await connectRedis();
 
     // Start the server
     const server = app.listen(PORT, () => {
@@ -35,6 +37,7 @@ const startServer = async () => {
         await mongoose.connection.close();
         logger.info('MongoDB connection closed');
 
+        await disconnectRedis();
         stopScheduler();
 
         process.exit(0);

@@ -1,12 +1,12 @@
-jest.mock('../config/database', () => jest.fn().mockResolvedValue(true));
-jest.mock('../services/reminderService', () => ({
+jest.mock('../config/database.js', () => jest.fn().mockResolvedValue(true));
+jest.mock('../services/reminderService.js', () => ({
   startScheduler: jest.fn(),
   stopScheduler: jest.fn(),
   runReminderJob: jest.fn().mockResolvedValue({ processed: 0, succeeded: 0, failed: 0 })
 }));
 
 import request from 'supertest';
-import app from '../app';
+import app from '../app.js';
 
 process.env.JWT_SECRET = 'test_secret';
 process.env.NODE_ENV = 'test';
@@ -84,7 +84,7 @@ describe('General Endpoints', () => {
 
 describe('POST /api/admin/trigger-reminders', () => {
   it('should trigger reminder job and return results', async () => {
-    const reminderService = await import('../services/reminderService');
+    const reminderService = await import('../services/reminderService.js');
     jest.spyOn(reminderService, 'runReminderJob').mockResolvedValueOnce({
       processed: 2,
       succeeded: 2,

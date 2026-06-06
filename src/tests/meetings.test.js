@@ -1,9 +1,31 @@
 import jwt from 'jsonwebtoken';
 
-jest.mock('../models/Meeting');
-jest.mock('../models/ActionItem');
-jest.mock('../models/User');
-jest.mock('../services/groqService', () => ({
+jest.mock('../models/Meeting.js', () => {
+  const Meeting = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+    findOneAndDelete: jest.fn(),
+    create: jest.fn(),
+    countDocuments: jest.fn()
+  };
+  return { Meeting, default: Meeting };
+});
+jest.mock('../models/ActionItem.js', () => {
+  const ActionItem = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+    findOneAndDelete: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    insertMany: jest.fn(),
+    countDocuments: jest.fn()
+  };
+  return { ActionItem, default: ActionItem };
+});
+jest.mock('../models/User.js', () => {
+  const User = { findById: jest.fn() };
+  return { User, default: User };
+});
+jest.mock('../services/groqService.js', () => ({
   analyzeMeeting: jest.fn().mockResolvedValue({
     summary: [{ text: 'Team plans to launch next Friday.', citations: [{ timestamp: '00:10', speaker: 'John', text: 'We should launch next Friday.' }] }],
     actionItems: [{ task: 'Prepare release notes', assignee: 'Alice', dueDate: null, citations: [{ timestamp: '00:20', speaker: 'Alice', text: 'I will prepare release notes.' }] }],
@@ -12,17 +34,17 @@ jest.mock('../services/groqService', () => ({
     analyzedAt: new Date()
   })
 }));
-jest.mock('../config/database', () => jest.fn().mockResolvedValue(true));
-jest.mock('../services/reminderService', () => ({
+jest.mock('../config/database.js', () => jest.fn().mockResolvedValue(true));
+jest.mock('../services/reminderService.js', () => ({
   startScheduler: jest.fn(),
   stopScheduler: jest.fn()
 }));
 
 import request from 'supertest';
-import app from '../app';
-import Meeting from '../models/Meeting';
-import ActionItem from '../models/ActionItem';
-import User from '../models/User';
+import app from '../app.js';
+import { Meeting } from '../models/Meeting.js';
+import { ActionItem } from '../models/ActionItem.js';
+import { User } from '../models/User.js';
 
 process.env.JWT_SECRET = 'test_secret';
 process.env.NODE_ENV = 'test';

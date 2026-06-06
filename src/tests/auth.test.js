@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 // Mock mongoose models
-jest.mock('../models/User', () => {
+jest.mock('../models/User.js', () => {
   const mockUser = {
     _id: 'user123',
     name: 'Test User',
@@ -14,11 +14,11 @@ jest.mock('../models/User', () => {
   MockUser.findOne = jest.fn();
   MockUser.create = jest.fn();
   MockUser.findById = jest.fn();
-  return MockUser;
+  return { User: MockUser, default: MockUser };
 });
 
-jest.mock('../config/database', () => jest.fn().mockResolvedValue(true));
-jest.mock('../services/reminderService', () => ({
+jest.mock('../config/database.js', () => jest.fn().mockResolvedValue(true));
+jest.mock('../services/reminderService.js', () => ({
   startScheduler: jest.fn(),
   stopScheduler: jest.fn(),
   runReminderJob: jest.fn()
@@ -26,7 +26,7 @@ jest.mock('../services/reminderService', () => ({
 
 import request from 'supertest';
 import app from '../app.js';
-import User from '../models/User.js';
+import { User } from '../models/User.js';
 
 process.env.JWT_SECRET = 'test_secret';
 process.env.NODE_ENV = 'test';

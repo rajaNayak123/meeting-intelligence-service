@@ -9,8 +9,10 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "jest --runInBand --forceExit",
-    "test:coverage": "jest --coverage --runInBand --forceExit"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --forceExit",
+    "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=tests/integration --setupFilesAfterEnv='[\"./src/tests/integration/setup.js\"]' --runInBand --forceExit",
+    "test:all": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --forceExit",
+    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --runInBand --forceExit"
   },
   "dependencies": {
     "axios": "^1.17.0",
@@ -21,6 +23,7 @@
     "express-rate-limit": "^8.5.2",
     "express-validator": "^7.3.2",
     "groq-sdk": "^1.2.1",
+    "ioredis": "^5.11.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.24.0",
     "node-cron": "^4.2.1",
@@ -38,7 +41,15 @@
   "jest": {
     "testEnvironment": "node",
     "testTimeout": 30000,
-    "setupFilesAfterEnv": ["./src/tests/dbSetup.js"],
-    "testMatch": ["**/tests/**/*.test.js"]
+    "extensionsToTreatAsEsm": [
+      ".js"
+    ],
+    "transform": {},
+    "setupFilesAfterEnv": [
+      "./src/tests/dbSetup.js"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ]
   }
 }
