@@ -49,8 +49,8 @@ app.get('/api/evaluation', (req, res) => {
     data: {
       candidateName: 'Raja Nayak',
       email: 'nayakraja@gmail.com',
-      repositoryUrl: 'https://github.com/yourusername/meeting-intelligence',
-      deployedUrl: process.env.BASE_URL || 'http://localhost:3000',
+      repositoryUrl: 'https://github.com/rajaNayak123/meeting-intelligence-service',
+      deployedUrl: 'https://meeting-intelligence-service-x3jb.onrender.com',
       externalIntegration: 'Slack Incoming Webhook',
       features: [
         'JWT Authentication',
