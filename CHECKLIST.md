@@ -23,11 +23,11 @@
 
 ## Bonus Milestones (Optional)
 
-- [ ] Docker support
+- [x] Docker support
 - [ ] CI/CD pipeline
-- [ ] Redis caching
+- [x] Redis caching
 - [x] Rate limiting (200 req / 15 min per IP)
-- [ ] Integration tests
+- [x] Integration tests
 
 ## Additional Features Implemented
 
